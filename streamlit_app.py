@@ -198,14 +198,7 @@ def sendgrid_alert(pred_data, llm_analysis):
     try:
         sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
         response = sg.send(message)
-        st.success(f"Email sent! Status code: {response.status_code}")
-    except Exception as e:
-        st.error(f"SendGrid failed: {e}")
-
-    try:
-        sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-        sg.send(message)
-        st.success("📧 SendGrid email sent!")
+        st.success(f"📧 SendGrid email sent! Status code: {response.status_code}")
     except Exception as e:
         st.error("❌ SendGrid failed")
         st.exception(e)
