@@ -1,1 +1,11 @@
 streamlit
+joblib
+pandas
+numpy
+scikit-learn
+matplotlib
+shap
+plotly
+requests
+sendgrid
+openai
