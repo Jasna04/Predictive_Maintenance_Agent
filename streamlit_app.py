@@ -1,5 +1,5 @@
 """
-Predictive Maintenance Streamlit App (A2A + Web-RAG + Multi-Agent)
+Predictive Maintenance Streamlit Agent
 - Dashboard, Trends, Logs, Insights
 - Automatic A2A/RAG agent triggered for high-risk predictions (< threshold_days)
 - SendGrid email alerts for high-risk predictions
