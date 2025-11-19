@@ -465,8 +465,8 @@ def parse_llm_analysis(text):
 
 def sendgrid_alert(pred_data, llm_analysis):
     # Get sender and recipients from environment variables
-    from_email = st.secrets.get("Email_ID")  # must be verified sender
-    to_emails_raw = st.secrets.get("Email_ID", "")
+    from_email = os.getenv("Email_ID")  # must be verified sender
+    to_emails_raw = os.getenv("Email_ID", "")
     to_emails = [e.strip() for e in to_emails_raw.split(",") if e.strip()]
 
     # Safety check: must have sender and at least one recipient
@@ -493,9 +493,9 @@ def sendgrid_alert(pred_data, llm_analysis):
     # Send the email
 
     try:
-        sg = SendGridAPIClient(st.secrets.get("SENDGRID_API_KEY"))
-        sg.send(message)
-        st.success("📧 SendGrid email sent!")
+        sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+        response = sg.send(message)
+        st.success(f"📧 SendGrid email sent! Status code: {response.status_code}")
     except Exception as e:
         st.error("❌ SendGrid failed")
         st.exception(e)
