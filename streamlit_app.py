@@ -76,12 +76,13 @@ SERPAPI_KEY = os.getenv("SERPAPI_API_KEY") or st.secrets.get("SERPAPI_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
 print(f"OPENAI_API_KEY present: {bool(OPENAI_API_KEY)}")
-if OPENAI_API_KEY:
+if GOOGLE_API_KEY:
     try:
-        openai.api_key = OPENAI_API_KEY
+        GEMINI_AVAILABLE = GEMINI_AVAILABLE and bool(GOOGLE_API_KEY)
+        
     except Exception:
         pass
-GEMINI_AVAILABLE = GEMINI_AVAILABLE and bool(GOOGLE_API_KEY)
+openai.api_key = OPENAI_API_KEY
 
 # Debug: show which genai implementation and keys are present (after keys loaded)
 print(f"GENAI_IMPL={GENAI_IMPL}, GEMINI_AVAILABLE={GEMINI_AVAILABLE}")
