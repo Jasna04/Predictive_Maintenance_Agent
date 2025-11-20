@@ -46,12 +46,8 @@ try:
     from google import genai
     GENAI_IMPL = "genai"
     genai_module = genai
+
 except Exception:
-    try:
-        import google.generativeai as generativeai
-        GENAI_IMPL = "generativeai"
-        genai_module = generativeai
-    except Exception:
         GENAI_IMPL = None
 
 GEMINI_AVAILABLE = GENAI_IMPL is not None
