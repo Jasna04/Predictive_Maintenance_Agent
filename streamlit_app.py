@@ -71,7 +71,7 @@ except:
 # -----------------------------
 # App Config
 # -----------------------------
-st.set_page_config(page_title="Predictive Maintenance (A2A Demo)", layout="wide")
+st.set_page_config(page_title="Predictive Maintenance Agent", layout="wide")
 SERPAPI_KEY = os.getenv("SERPAPI_API_KEY") or st.secrets.get("SERPAPI_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
