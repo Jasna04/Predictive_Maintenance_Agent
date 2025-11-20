@@ -46,8 +46,12 @@ try:
     from google import genai
     GENAI_IMPL = "genai"
     genai_module = genai
-
 except Exception:
+    try:
+        import google.generativeai as generativeai
+        GENAI_IMPL = "generativeai"
+        genai_module = generativeai
+    except Exception:
         GENAI_IMPL = None
 
 GEMINI_AVAILABLE = GENAI_IMPL is not None
@@ -138,7 +142,7 @@ def plotly_gauge(value, color, max_range=100):
             title={'text': "Predicted Days to Failure"},
             gauge={
                 'axis': {'range': [0, max_range]},
-                'bar': {'color': color},
+                'bar': {'color': color}, 
                 'steps': [
                     {'range': [0, max_range*0.25], 'color':'rgba(255,0,0,0.3)'},
                     {'range': [max_range*0.25, max_range*0.5], 'color':'rgba(255,165,0,0.3)'},
