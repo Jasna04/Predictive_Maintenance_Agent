@@ -46,8 +46,12 @@ try:
     from google import genai
     GENAI_IMPL = "genai"
     genai_module = genai
-
 except Exception:
+    try:
+        import google.generativeai as generativeai
+        GENAI_IMPL = "generativeai"
+        genai_module = generativeai
+    except Exception:
         GENAI_IMPL = None
 
 GEMINI_AVAILABLE = GENAI_IMPL is not None
@@ -76,13 +80,17 @@ SERPAPI_KEY = os.getenv("SERPAPI_API_KEY") or st.secrets.get("SERPAPI_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
 print(f"OPENAI_API_KEY present: {bool(OPENAI_API_KEY)}")
+if OPENAI_API_KEY:
+    try:
+        openai.api_key = OPENAI_API_KEY
+    except Exception:
+        pass
 if GOOGLE_API_KEY:
     try:
         GEMINI_AVAILABLE = GEMINI_AVAILABLE and bool(GOOGLE_API_KEY)
         
     except Exception:
         pass
-openai.api_key = OPENAI_API_KEY
 
 # Debug: show which genai implementation and keys are present (after keys loaded)
 print(f"GENAI_IMPL={GENAI_IMPL}, GEMINI_AVAILABLE={GEMINI_AVAILABLE}")
@@ -134,7 +142,7 @@ def plotly_gauge(value, color, max_range=100):
             title={'text': "Predicted Days to Failure"},
             gauge={
                 'axis': {'range': [0, max_range]},
-                'bar': {'color': color}, 
+                'bar': {'color': color},
                 'steps': [
                     {'range': [0, max_range*0.25], 'color':'rgba(255,0,0,0.3)'},
                     {'range': [max_range*0.25, max_range*0.5], 'color':'rgba(255,165,0,0.3)'},
