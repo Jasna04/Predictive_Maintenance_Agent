@@ -151,6 +151,17 @@ try:
     prov_text = "Gemini available" if GEMINI_AVAILABLE and GOOGLE_API_KEY else "Gemini unavailable"
     prov_text += " | OpenAI available" if OPENAI_AVAILABLE and OPENAI_API_KEY else " | OpenAI unavailable"
     st.sidebar.markdown(f"**LLM Status:** {prov_text}")
+    
+    # Debug info - remove after fixing
+    with st.sidebar.expander("🔧 Debug Info"):
+        st.write(f"GENAI_IMPL: {GENAI_IMPL}")
+        st.write(f"GEMINI_AVAILABLE: {GEMINI_AVAILABLE}")
+        st.write(f"OPENAI_AVAILABLE: {OPENAI_AVAILABLE}")
+        st.write(f"Google API Key: {'✓ Present' if GOOGLE_API_KEY else '✗ Missing'}")
+        st.write(f"OpenAI API Key: {'✓ Present' if OPENAI_API_KEY else '✗ Missing'}")
+        st.write(f"st.secrets available: {hasattr(st, 'secrets')}")
+        if hasattr(st, 'secrets'):
+            st.write(f"Keys in secrets: {list(st.secrets.keys())}")
 except Exception:
     pass
 
