@@ -81,13 +81,21 @@ st.set_page_config(page_title="Predictive Maintenance (A2A Demo)", layout="wide"
 def get_secret(key, default=None):
     """Safely get a secret from st.secrets or return default."""
     try:
-        return st.secrets.get(key, default)
+        if hasattr(st, 'secrets') and key in st.secrets:
+            return st.secrets[key]
+        return default
     except:
         return default
 
 SERPAPI_KEY = os.getenv("SERPAPI_API_KEY") or get_secret("SERPAPI_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") or get_secret("GOOGLE_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or get_secret("OPENAI_API_KEY")
+
+# Update GEMINI_AVAILABLE based on actual API key presence
+if not GOOGLE_API_KEY:
+    GEMINI_AVAILABLE = False
+if not OPENAI_API_KEY:
+    OPENAI_AVAILABLE = False
 
 # Configure Google API first
 if GOOGLE_API_KEY and GENAI_IMPL == "generativeai":
