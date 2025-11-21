@@ -48,7 +48,7 @@ try:
     genai_module = genai
 except Exception:
     try:
-        import google.generativeai as generativeai
+        import google.generativeai as generativeai # type: ignore
         GENAI_IMPL = "generativeai"
         genai_module = generativeai
     except Exception:
@@ -80,17 +80,40 @@ SERPAPI_KEY = os.getenv("SERPAPI_API_KEY") or st.secrets.get("SERPAPI_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
 print(f"OPENAI_API_KEY present: {bool(OPENAI_API_KEY)}")
+if GOOGLE_API_KEY:
+    try:
+        GEMINI_AVAILABLE = GEMINI_AVAILABLE and bool(GOOGLE_API_KEY)
+    except Exception:
+        pass
+
+if OPENAI_API_KEY:
+    try:
+        
+        openai.api_key = OPENAI_API_KEY
+    except Exception:
+        pass
+openai.api_key = OPENAI_API_KEY
+
+# Debug: show which genai implementation and keys are present (after keys loaded)
+print(f"GENAI_IMPL={GENAI_IMPL}, GEMINI_AVAILABLE={GEMINI_AVAILABLE}")
+print(f"GOOGLE_API_KEY present (env/st.secrets): {bool(GOOGLE_API_KEY)}")
+print(f"OPENAI_AVAILABLE={OPENAI_AVAILABLE}, OPENAI_API_KEY present: {bool(OPENAI_API_KEY)}")
+
+# Show provider in sidebar for quick visibility
+try:
+    prov_text = "Gemini available" if GEMINI_AVAILABLE and GOOGLE_API_KEY else "Gemini unavailable"
+    prov_text += " | OpenAI available" if OPENAI_AVAILABLE and OPENAI_API_KEY else " | OpenAI unavailable"
+    st.sidebar.markdown(f"**LLM Status:** {prov_text}")
+except Exception:
+    pass
+=======
 if OPENAI_API_KEY:
     try:
         openai.api_key = OPENAI_API_KEY
     except Exception:
         pass
-if GOOGLE_API_KEY:
-    try:
-        GEMINI_AVAILABLE = GEMINI_AVAILABLE and bool(GOOGLE_API_KEY)
-        
-    except Exception:
-        pass
+GEMINI_AVAILABLE = GEMINI_AVAILABLE and bool(GOOGLE_API_KEY)
+>>>>>>> 7dbf5e5 (commit)
 
 # Debug: show which genai implementation and keys are present (after keys loaded)
 print(f"GENAI_IMPL={GENAI_IMPL}, GEMINI_AVAILABLE={GEMINI_AVAILABLE}")
@@ -142,7 +165,11 @@ def plotly_gauge(value, color, max_range=100):
             title={'text': "Predicted Days to Failure"},
             gauge={
                 'axis': {'range': [0, max_range]},
+<<<<<<< HEAD
                 'bar': {'color': color}, 
+=======
+                'bar': {'color': color},
+>>>>>>> 7dbf5e5 (commit)
                 'steps': [
                     {'range': [0, max_range*0.25], 'color':'rgba(255,0,0,0.3)'},
                     {'range': [max_range*0.25, max_range*0.5], 'color':'rgba(255,165,0,0.3)'},
