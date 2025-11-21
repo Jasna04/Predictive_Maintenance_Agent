@@ -8,4 +8,4 @@ shap
 plotly
 requests
 sendgrid
-openai
+openaigoogle-generativeai
