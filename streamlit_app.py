@@ -91,14 +91,23 @@ def get_secret(key, default=None):
     """Safely get a secret from st.secrets or return default."""
     try:
         if hasattr(st, 'secrets') and key in st.secrets:
-            return st.secrets[key]
+            value = st.secrets[key]
+            print(f"✓ Loaded {key} from st.secrets (length: {len(str(value))})")
+            return value
+        print(f"✗ {key} not found in st.secrets")
         return default
-    except:
+    except Exception as e:
+        print(f"✗ Error loading {key}: {e}")
         return default
 
 SERPAPI_KEY = os.getenv("SERPAPI_API_KEY") or get_secret("SERPAPI_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") or get_secret("GOOGLE_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or get_secret("OPENAI_API_KEY")
+
+print(f"📊 API Keys Status:")
+print(f"  GOOGLE_API_KEY: {'✓ Present' if GOOGLE_API_KEY else '✗ Missing'}")
+print(f"  OPENAI_API_KEY: {'✓ Present' if OPENAI_API_KEY else '✗ Missing'}")
+print(f"  SERPAPI_KEY: {'✓ Present' if SERPAPI_KEY else '✗ Missing'}")
 
 # Update GEMINI_AVAILABLE based on actual API key presence
 if not GOOGLE_API_KEY:
