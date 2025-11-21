@@ -88,22 +88,31 @@ def get_secret(key, default=None):
 SERPAPI_KEY = os.getenv("SERPAPI_API_KEY") or get_secret("SERPAPI_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") or get_secret("GOOGLE_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or get_secret("OPENAI_API_KEY")
-print(f"GOOGLE_API_KEY present: {bool(GOOGLE_API_KEY)}")
-print(f"OPENAI_API_KEY present: {bool(OPENAI_API_KEY)}")
+
+# Update availability based on API keys
+if not GOOGLE_API_KEY:
+    GEMINI_AVAILABLE = False
+    
+if not OPENAI_API_KEY:
+    OPENAI_AVAILABLE = False
 
 # Configure Google API first
-if GOOGLE_API_KEY:
+if GOOGLE_API_KEY and GENAI_IMPL == "generativeai":
     try:
-        GEMINI_AVAILABLE = GEMINI_AVAILABLE and bool(GOOGLE_API_KEY)
-    except Exception:
-        pass
+        genai_module.configure(api_key=GOOGLE_API_KEY)
+        print("✅ Google Gemini configured successfully")
+    except Exception as e:
+        print(f"⚠️ Google Gemini configuration failed: {e}")
+        GEMINI_AVAILABLE = False
 
 # Then configure OpenAI
 if OPENAI_API_KEY:
     try:
         openai.api_key = OPENAI_API_KEY
-    except Exception:
-        pass
+        print("✅ OpenAI configured successfully")
+    except Exception as e:
+        print(f"⚠️ OpenAI configuration failed: {e}")
+        OPENAI_AVAILABLE = False
 
 # Debug: show which genai implementation and keys are present (after keys loaded)
 print(f"GENAI_IMPL={GENAI_IMPL}, GEMINI_AVAILABLE={GEMINI_AVAILABLE}")
