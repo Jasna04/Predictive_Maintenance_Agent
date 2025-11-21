@@ -19,6 +19,11 @@ import numpy as np
 import joblib
 import requests
 
+
+# Force cache clear - remove this line after deployment
+st.cache_data.clear()
+st.cache_resource.clear()
+
 # Optional plotting & explainability
 try:
     import plotly.graph_objects as go
