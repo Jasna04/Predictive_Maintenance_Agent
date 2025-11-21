@@ -71,7 +71,7 @@ except:
 # -----------------------------
 # App Config
 # -----------------------------
-st.set_page_config(page_title="Predictive Maintenance Agent", layout="wide")
+st.set_page_config(page_title="Predictive Maintenance (A2A Demo)", layout="wide")
 SERPAPI_KEY = os.getenv("SERPAPI_API_KEY") or st.secrets.get("SERPAPI_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
@@ -134,7 +134,7 @@ def plotly_gauge(value, color, max_range=100):
             title={'text': "Predicted Days to Failure"},
             gauge={
                 'axis': {'range': [0, max_range]},
-                'bar': {'color': color},
+                'bar': {'color': color}, 
                 'steps': [
                     {'range': [0, max_range*0.25], 'color':'rgba(255,0,0,0.3)'},
                     {'range': [max_range*0.25, max_range*0.5], 'color':'rgba(255,165,0,0.3)'},
