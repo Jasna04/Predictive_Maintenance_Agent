@@ -97,14 +97,22 @@ if not GOOGLE_API_KEY:
 if not OPENAI_API_KEY:
     OPENAI_AVAILABLE = False
 
-# Configure Google API first
-if GOOGLE_API_KEY and GENAI_IMPL == "generativeai":
+# Configure Google API for both implementations
+if GOOGLE_API_KEY and GEMINI_AVAILABLE:
     try:
-        genai_module.configure(api_key=GOOGLE_API_KEY)
-        print("✅ Google Gemini configured successfully")
+        if GENAI_IMPL == "generativeai":
+            genai_module.configure(api_key=GOOGLE_API_KEY)
+            print("✅ Google Gemini (generativeai) configured successfully")
+        elif GENAI_IMPL == "genai":
+            # The new genai module doesn't need upfront configuration
+            # API key is passed when creating client
+            print("✅ Google Gemini (genai) ready")
     except Exception as e:
         print(f"⚠️ Google Gemini configuration failed: {e}")
         GEMINI_AVAILABLE = False
+elif not GOOGLE_API_KEY:
+    GEMINI_AVAILABLE = False
+    print("⚠️ Google API key not found - Gemini unavailable")
 
 # Then configure OpenAI
 if OPENAI_API_KEY:
