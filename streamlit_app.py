@@ -89,13 +89,6 @@ SERPAPI_KEY = os.getenv("SERPAPI_API_KEY") or get_secret("SERPAPI_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") or get_secret("GOOGLE_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or get_secret("OPENAI_API_KEY")
 
-# Update availability based on API keys
-if not GOOGLE_API_KEY:
-    GEMINI_AVAILABLE = False
-    
-if not OPENAI_API_KEY:
-    OPENAI_AVAILABLE = False
-
 # Configure Google API first
 if GOOGLE_API_KEY and GENAI_IMPL == "generativeai":
     try:
