@@ -19,6 +19,10 @@ import numpy as np
 import joblib
 import requests
 
+# Force cache clear - remove these lines after deployment works
+st.cache_data.clear()
+st.cache_resource.clear()
+
 
 # Force cache clear - remove this line after deployment
 st.cache_data.clear()
