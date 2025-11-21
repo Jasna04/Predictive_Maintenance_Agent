@@ -76,9 +76,18 @@ except:
 # App Config
 # -----------------------------
 st.set_page_config(page_title="Predictive Maintenance (A2A Demo)", layout="wide")
-SERPAPI_KEY = os.getenv("SERPAPI_API_KEY") or st.secrets.get("SERPAPI_API_KEY")
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
+
+# Safely get API keys from environment or secrets
+def get_secret(key, default=None):
+    """Safely get a secret from st.secrets or return default."""
+    try:
+        return st.secrets.get(key, default)
+    except:
+        return default
+
+SERPAPI_KEY = os.getenv("SERPAPI_API_KEY") or get_secret("SERPAPI_API_KEY")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") or get_secret("GOOGLE_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or get_secret("OPENAI_API_KEY")
 print(f"GOOGLE_API_KEY present: {bool(GOOGLE_API_KEY)}")
 print(f"OPENAI_API_KEY present: {bool(OPENAI_API_KEY)}")
 
@@ -476,41 +485,57 @@ def parse_llm_analysis(text):
     }
 
 def sendgrid_alert(pred_data, llm_analysis):
-    # Get sender and recipients from environment variables
-    from_email = os.getenv("Email_ID")  # must be verified sender
-    to_emails_raw = os.getenv("Email_ID", "")
+    # Get sender and recipients from environment variables or secrets
+    from_email = os.getenv("Email_ID") or get_secret("Email_ID")
+    to_emails_raw = os.getenv("Email_ID") or get_secret("Email_ID") or ""
     to_emails = [e.strip() for e in to_emails_raw.split(",") if e.strip()]
+    
+    sendgrid_key = os.getenv("SENDGRID_API_KEY") or get_secret("SENDGRID_API_KEY")
 
-    # Safety check: must have sender and at least one recipient
+    # Safety check: must have sender, recipient, and API key
     if not from_email or not to_emails:
-        st.error("SendGrid sender or recipient not configured correctly")
-        return  # exit function early
-
-    # Construct the email message
-    message = Mail(
-        from_email=from_email,
-        to_emails=to_emails,
-        subject=f"🚨 HIGH RISK ALERT: {pred_data.get('device_id')}",
-        html_content=f"""
-        <h2>High Failure Risk Detected</h2>
-        <p><b>Device:</b> {pred_data.get('device_id')}</p>
-        <p><b>Predicted Days Left:</b> {pred_data.get('predicted_days_to_failure')}</p>
-        <h3>Summary</h3><p>{llm_analysis.get('summary')}</p>
-        <h3>Root Cause</h3><p>{llm_analysis.get('root_cause')}</p>
-        <h3>Recommended Actions</h3>
-        <ul>{''.join([f"<li>{a}</li>" for a in llm_analysis.get('recommended_actions', [])])}</ul>
-        """
-    )
-
-    # Send the email
+        st.warning("⚠️ SendGrid email not configured (Email_ID missing)")
+        return
+    
+    if not sendgrid_key:
+        st.warning("⚠️ SendGrid API key not configured")
+        return
+    
+    # Validate API key format
+    if not sendgrid_key.startswith("SG."):
+        st.error("❌ Invalid SendGrid API key format (should start with 'SG.')")
+        return
 
     try:
-        sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+        # Construct the email message
+        message = Mail(
+            from_email=from_email,
+            to_emails=to_emails,
+            subject=f"🚨 HIGH RISK ALERT: {pred_data.get('device_id')}",
+            html_content=f"""
+            <h2>High Failure Risk Detected</h2>
+            <p><b>Device:</b> {pred_data.get('device_id')}</p>
+            <p><b>Predicted Days Left:</b> {pred_data.get('predicted_days_to_failure')}</p>
+            <h3>Summary</h3><p>{llm_analysis.get('summary', 'N/A')}</p>
+            <h3>Root Cause</h3><p>{llm_analysis.get('root_cause', 'N/A')}</p>
+            <h3>Recommended Actions</h3>
+            <ul>{''.join([f"<li>{a}</li>" for a in llm_analysis.get('recommended_actions', [])])}</ul>
+            """
+        )
+
+        # Send the email
+        sg = SendGridAPIClient(sendgrid_key)
         response = sg.send(message)
         st.success(f"📧 SendGrid email sent! Status code: {response.status_code}")
     except Exception as e:
-        st.error("❌ SendGrid failed")
-        st.exception(e)
+        error_msg = str(e)
+        if "502" in error_msg:
+            st.error("❌ SendGrid 502 Error - Check your API key is valid and active")
+        elif "401" in error_msg or "403" in error_msg:
+            st.error("❌ SendGrid Authentication Failed - Invalid API key")
+        else:
+            st.error(f"❌ SendGrid failed: {error_msg}")
+        print(f"SendGrid Error Details: {e}")
 
 # -----------------------------
 # Load model
