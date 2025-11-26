@@ -127,31 +127,30 @@ st.markdown("""
 
 # Get secrets
 def get_secret(key):
-    env_val = os.getenv(key)
-    if env_val:
-        logger.info(f"Reading {key} from ENVIRONMENT: {env_val[:20]}...")
-        return env_val
     try:
+        # Always reload secrets for each key fetch
         secret_val = st.secrets.get(key)
-        if secret_val:
-            logger.info(f"Reading {key} from SECRETS.TOML: {secret_val[:20]}...")
+        logger.info(f"[DEBUG] Fetching {key} from st.secrets: {'SET' if secret_val else 'None'}")
         return secret_val
     except Exception as e:
         logger.warning(f"Could not read {key} from secrets: {e}")
         return None
 
-SERPAPI_KEY = get_secret("SERPAPI_API_KEY")
-GOOGLE_API_KEY = get_secret("GOOGLE_API_KEY")
-OPENAI_API_KEY = get_secret("OPENAI_API_KEY")
+SERPAPI_KEY = None
+GOOGLE_API_KEY = None
+OPENAI_API_KEY = None
 
-# Debug: Log API key status
-logger.info(f"GOOGLE_API_KEY configured: {bool(GOOGLE_API_KEY)}")
-if GOOGLE_API_KEY:
-    logger.info(f"GOOGLE_API_KEY value: {GOOGLE_API_KEY[:30]}...")
-logger.info(f"OPENAI_API_KEY configured: {bool(OPENAI_API_KEY)}")
-if OPENAI_API_KEY:
-    logger.info(f"OPENAI_API_KEY value: {OPENAI_API_KEY[:30]}...")
-logger.info(f"SERPAPI_KEY configured: {bool(SERPAPI_KEY)}")
+
+def refresh_api_keys():
+    global SERPAPI_KEY, GOOGLE_API_KEY, OPENAI_API_KEY
+    SERPAPI_KEY = get_secret("SERPAPI_API_KEY")
+    GOOGLE_API_KEY = get_secret("GOOGLE_API_KEY")
+    OPENAI_API_KEY = get_secret("OPENAI_API_KEY")
+    logger.info(f"[DEBUG] Refreshed GOOGLE_API_KEY: {'SET' if GOOGLE_API_KEY else 'None'}")
+    logger.info(f"[DEBUG] Refreshed OPENAI_API_KEY: {'SET' if OPENAI_API_KEY else 'None'}")
+    logger.info(f"[DEBUG] Refreshed SERPAPI_KEY: {'SET' if SERPAPI_KEY else 'None'}")
+
+refresh_api_keys()
 
 if GOOGLE_API_KEY and GEMINI_AVAILABLE:
     try:
@@ -1015,10 +1014,12 @@ st.sidebar.header("Agent Configuration")
 max_iterations = st.sidebar.slider("Max Iterations", 1, 10, 5)
 show_reasoning = st.sidebar.checkbox("Show Detailed Reasoning", value=True)
 
+
 # LLM Status
 st.sidebar.markdown("---")
 st.sidebar.subheader("🤖 LLM Status")
 llm_status = get_llm_status()
+
 
 if llm_status["gemini"]["available"]:
     st.sidebar.success("✅ Gemini API configured")
@@ -1220,35 +1221,7 @@ if st.button("🚀 Start Agent Loop", type="primary"):
             st.info("No email sent")
     # ...existing code...
 
-    # SHAP chart below RAG summary, full width
-    st.markdown("---")
-    if prediction_result and SHAP_AVAILABLE and MATPLOTLIB_AVAILABLE:
-        st.subheader("🔍 SHAP Feature Contributions")
-        base_inputs = {
-            "temperature": context["temperature"],
-            "vibration": context["vibration"],
-            "pressure": context["pressure"],
-            "humidity": context["humidity"],
-            "power_consumption": context["power_consumption"]
-        }
-        input_df = one_hot_encode_input(base_inputs, context["device_id"], context["device_type"], model_features)
-        import shap
-        import matplotlib.pyplot as plt
-        explainer = shap.Explainer(model)
-        shap_values = explainer(input_df)
-        fig, ax = plt.subplots(figsize=(14, 6))  # Maximum visibility
-        shap.plots.bar(shap_values[0], show=False, ax=ax)
-        plt.tight_layout(pad=0.2)
-        ax.set_title("")
-        ax.set_xlabel("")
-        ax.set_ylabel("")
-        ax.margins(0)
-        ax.tick_params(axis='both', labelsize=12)
-        for label in ax.get_xticklabels() + ax.get_yticklabels():
-            label.set_fontsize(12)
-        for text in ax.texts:
-            text.set_fontsize(10)
-        st.pyplot(fig, clear_figure=True)
+    # ...existing code...
     # ...existing code...
     
     # RAG Details
@@ -1263,7 +1236,35 @@ if st.button("🚀 Start Agent Loop", type="primary"):
             st.markdown("**Sources:**")
             for source in sources:
                 st.markdown(f"- [{source}]({source})")
-        # SHAP feature chart removed
+        # SHAP feature chart moved after RAG
+        st.markdown("---")
+        if prediction_result and SHAP_AVAILABLE and MATPLOTLIB_AVAILABLE:
+            st.subheader("🔍 SHAP Feature Contributions")
+            base_inputs = {
+                "temperature": context["temperature"],
+                "vibration": context["vibration"],
+                "pressure": context["pressure"],
+                "humidity": context["humidity"],
+                "power_consumption": context["power_consumption"]
+            }
+            input_df = one_hot_encode_input(base_inputs, context["device_id"], context["device_type"], model_features)
+            import shap
+            import matplotlib.pyplot as plt
+            explainer = shap.Explainer(model)
+            shap_values = explainer(input_df)
+            fig, ax = plt.subplots(figsize=(14, 6))  # Maximum visibility
+            shap.plots.bar(shap_values[0], show=False, ax=ax)
+            plt.tight_layout(pad=0.2)
+            ax.set_title("")
+            ax.set_xlabel("")
+            ax.set_ylabel("")
+            ax.margins(0)
+            ax.tick_params(axis='both', labelsize=12)
+            for label in ax.get_xticklabels() + ax.get_yticklabels():
+                label.set_fontsize(12)
+            for text in ax.texts:
+                text.set_fontsize(10)
+            st.pyplot(fig, clear_figure=True)
     # Show execution trace
     if show_reasoning:
         st.markdown("### 📊 Execution Trace")
@@ -1368,6 +1369,7 @@ if st.button("🚀 Start Agent Loop", type="primary"):
             "rag_memory": rag_mem,
             "email_memory": email_mem
         })
+
 
 # History
 if st.session_state.agent_runs:
