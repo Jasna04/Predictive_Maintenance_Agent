@@ -8,7 +8,6 @@ Predictive Analytics: Uses historical and real-time sensor data to forecast equi
 Root Cause Analysis (RAG): Integrates retrieval-augmented generation (RAG) to explain failures and suggest targeted interventions.
 Automated Alerts: Sends email notifications to maintenance teams with detailed recommendations and risk assessments.
 Interactive UI: Modern Streamlit interface with customizable backgrounds, clear system status indicators, and device input controls.
-Privacy & Security: Sensitive information, such as email addresses and API keys, is protected and redacted from UI logs.
 
 **How It Works**
 
