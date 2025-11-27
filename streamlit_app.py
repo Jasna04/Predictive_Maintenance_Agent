@@ -1242,11 +1242,13 @@ st.markdown("<div style='height:32px'></div>", unsafe_allow_html=True)
 col1, col2 = st.columns([1.2,1.2], gap="medium")
 
 with col1:
-    st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:32px'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
     device_id = st.selectbox("🆔 Device ID", ["Device001", "Device002", "Device003"])
-    st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:40px'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
     device_type = st.selectbox("⚙️ Device Type", ["Pump", "Compressor", "Motor"])
-    st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:40px'></div>", unsafe_allow_html=True)
     temperature = st.slider("🌡️ Temperature (°C)", 100.0, 200.0, 160.0)
     st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
     vibration = st.slider("🌀 Vibration (mm/s)", 0.0, 10.0, 2.5)
@@ -1260,7 +1262,7 @@ with col2:
     power = st.slider("⚡ Power (kW)", 0, 200, 50)
 st.markdown("<div style='height:32px'></div>", unsafe_allow_html=True)
 
-if st.button("🚀 Start Agent Loop", type="primary"):
+if st.button("🚀 Start Agent", type="primary"):
     # Check if LLM is available
     llm_status = get_llm_status()
     if not (llm_status["gemini"]["available"] or llm_status["openai"]["available"]):
@@ -1275,7 +1277,7 @@ if st.button("🚀 Start Agent Loop", type="primary"):
     st.markdown("---")
     st.subheader("🤖 Parallel Agents Execution")
 
-    # Show diagnostic info
+    # Show diagnostic info (always collapsed)
     with st.expander("🔍 System Status", expanded=False):
         diag_col1, diag_col2 = st.columns(2)
         with diag_col1:
