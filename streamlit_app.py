@@ -90,16 +90,23 @@ logger.info(f"GENAI_IMPL: {GENAI_IMPL}")
 st.set_page_config(
     page_title="ForeSight Agent - Agentic Loop", 
     layout="wide",
-    page_icon="🔮",
+    page_icon="👷",
     initial_sidebar_state="expanded"
 )
 
 st.markdown("""
     <style>
+    /* Custom background image for the app */
+    body, .stApp {
+        background-image: url('https://img.freepik.com/free-photo/different-wrenches-table_23-2147772262.jpg?t=st=1764246769~exp=1764250369~hmac=cc59f7a74caf9a0d72519a165245a09b69578f168e77609eaed6bc730fb35024&w=2000&h=2000');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-attachment: fixed;
+    }
     /* Remove all custom overlays and revert to default Streamlit style */
-    body:before, .stApp, section[data-testid="stSidebar"], .main .block-container, [data-testid="stVerticalBlock"], .stExpander, .stAlert, .stInfo {
-        background: none !important;
-        background-color: #fff !important;
+    section[data-testid="stSidebar"], .main .block-container, [data-testid="stVerticalBlock"], .stExpander, .stAlert, .stInfo {
+        background: rgba(255,255,255,0.85) !important;
         box-shadow: none !important;
         border-radius: 0 !important;
         content: none !important;
@@ -1559,5 +1566,16 @@ if st.session_state.agent_runs:
             st.markdown("**RAG Agent Memory:**")
             st.json(run.get("rag_memory", {}))
             st.markdown("**Email Agent Memory:**")
-            st.json(run.get("email_memory", {}))
+            import re
+            def redact_emails(obj):
+                if isinstance(obj, dict):
+                    return {k: redact_emails(v) for k, v in obj.items()}
+                elif isinstance(obj, list):
+                    return [redact_emails(v) for v in obj]
+                elif isinstance(obj, str):
+                    # Replace email addresses with [REDACTED]
+                    return re.sub(r"[\w\.-]+@[\w\.-]+", "[REDACTED]", obj)
+                else:
+                    return obj
+            st.json(redact_emails(run.get("email_memory", {})))
 
