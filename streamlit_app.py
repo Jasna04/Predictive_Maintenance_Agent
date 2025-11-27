@@ -127,8 +127,8 @@ st.markdown("""
 
 # Get secrets
 def get_secret(key):
+    # Do not cache secrets, always fetch fresh
     try:
-        # Always reload secrets for each key fetch
         secret_val = st.secrets.get(key)
         logger.info(f"[DEBUG] Fetching {key} from st.secrets: {'SET' if secret_val else 'None'}")
         return secret_val
@@ -146,9 +146,10 @@ def refresh_api_keys():
     SERPAPI_KEY = get_secret("SERPAPI_API_KEY")
     GOOGLE_API_KEY = get_secret("GOOGLE_API_KEY")
     OPENAI_API_KEY = get_secret("OPENAI_API_KEY")
-    logger.info(f"[DEBUG] Refreshed GOOGLE_API_KEY: {'SET' if GOOGLE_API_KEY else 'None'}")
-    logger.info(f"[DEBUG] Refreshed OPENAI_API_KEY: {'SET' if OPENAI_API_KEY else 'None'}")
-    logger.info(f"[DEBUG] Refreshed SERPAPI_KEY: {'SET' if SERPAPI_KEY else 'None'}")
+    # Always log the actual value for debugging (not in UI)
+    logger.info(f"[DEBUG] Refreshed GOOGLE_API_KEY: {GOOGLE_API_KEY}")
+    logger.info(f"[DEBUG] Refreshed OPENAI_API_KEY: {OPENAI_API_KEY}")
+    logger.info(f"[DEBUG] Refreshed SERPAPI_KEY: {SERPAPI_KEY}")
 
 refresh_api_keys()
 
@@ -174,7 +175,7 @@ HUMIDITY_HIGH_THRESHOLD = 70
 POWER_HIGH_THRESHOLD = 150
 
 DEFAULT_LLM_MODEL = "gpt-3.5-turbo"
-GEMINI_MODEL_NAME = "gemini-2.0-flash-exp"
+GEMINI_MODEL_NAME = "gemini-2.5-flash-lite"
 DEFAULT_MAX_TOKENS = 1500
 DEFAULT_TEMPERATURE = 0.7
 
@@ -280,27 +281,175 @@ def one_hot_encode_input(base_inputs, device_id, device_type, model_features):
     return df
 
 @st.cache_data(ttl=3600, show_spinner=False)
-def serpapi_search(query, num_results=5):
-    if not SERPAPI_KEY:
-        logger.warning("SerpAPI key not configured")
-        return []
+def web_search(query, num_results=5):
+    # Try Google Custom Search first
+    GOOGLE_CSE_ID = get_secret("GOOGLE_CSE_ID")
+    GOOGLE_API_KEY = get_secret("GOOGLE_API_KEY")
+    # Debug info removed for page load privacy
+    logger.info(f"[DEBUG] GOOGLE_API_KEY: {GOOGLE_API_KEY}")
+    logger.info(f"[DEBUG] GOOGLE_CSE_ID: {GOOGLE_CSE_ID}")
+    results = google_cse_search(query, num_results, GOOGLE_CSE_ID, GOOGLE_API_KEY)
+    return {
+        "results": results,
+        "provider": "Google CSE"
+    }
+
+GOOGLE_API_KEY = get_secret("GOOGLE_API_KEY")
+GOOGLE_CSE_ID = get_secret("GOOGLE_CSE_ID")
+GEMINI_MODEL = "gemini-2.5-flash-lite"
+GEMINI_URL = f"https://generativelanguage.googleapis.com/v1/models/{GEMINI_MODEL}:generateContent?key={GOOGLE_API_KEY}"
+
+logger = logging.getLogger(__name__)
+
+
+# --------------------------------------------------------
+# 1) GOOGLE CUSTOM SEARCH (REAL WEB DATA)
+# --------------------------------------------------------
+def google_cse_search(query, num_results=5, GOOGLE_CSE_ID=None, GOOGLE_API_KEY=None):
+    # fetch from secrets if not provided
+    if GOOGLE_CSE_ID is None:
+        GOOGLE_CSE_ID = get_secret("GOOGLE_CSE_ID")
+    if GOOGLE_API_KEY is None:
+        GOOGLE_API_KEY = get_secret("GOOGLE_API_KEY")
+
+    url = "https://www.googleapis.com/customsearch/v1"
+    params = {
+        "q": query,
+        "key": GOOGLE_API_KEY,
+        "cx": GOOGLE_CSE_ID,
+        "num": min(num_results, 10)  # max 10 per request
+    }
+
     try:
-        url = "https://serpapi.com/search.json"
-        params = {"q": query, "engine": "google", "num": num_results, "api_key": SERPAPI_KEY}
-        r = requests.get(url, params=params, timeout=15)
-        r.raise_for_status()
-        data = r.json()
-        results = []
-        for item in data.get("organic_results", [])[:num_results]:
-            results.append({
-                "title": item.get("title"),
-                "snippet": item.get("snippet") or "",
-                "link": item.get("link")
-            })
-        return results
+        resp = requests.get(url, params=params, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+        logger.info(f"[CSE] Raw response data: {data}")
     except Exception as e:
-        logger.error(f"SerpAPI search failed: {e}")
+        logger.error(f"[CSE] Search error: {e}")
         return []
+
+    items = data.get("items", [])
+    results = [
+        {"title": item.get("title", ""), "snippet": item.get("snippet", ""), "link": item.get("link", "")}
+        for item in items
+    ]
+    
+    if not results:
+        logger.warning(f"[CSE] No search results found for query: {query}")
+
+    return results
+
+
+# --------------------------------------------------------
+# 2) GEMINI RAG SUMMARIZER + ANALYZER
+# --------------------------------------------------------
+def gemini_rag_analyze(query, search_results):
+    """
+    Feed real CSE results to Gemini to reason, summarize, extract insights.
+    """
+
+    text_block = " ".join(
+        [f"Title: {r['title']}\nURL: {r['link']}\nSnippet: {r['snippet']}\n\n"
+         for r in search_results]
+    )
+
+    prompt = f"""
+You are an intelligent research agent.
+Here is the user query: {query}
+
+Here are the REAL web search results from Google Search:
+
+{text_block}
+
+Task:
+1. Summarize the most important facts.
+2. Extract insights relevant to the query.
+3. Remove noise and duplicates.
+4. Provide final conclusions.
+5. Return actionable recommendations if applicable.
+
+Return clear paragraph form.
+    """
+
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": prompt}
+                ]
+            }
+        ]
+    }
+
+    headers = {"Content-Type": "application/json"}
+
+    try:
+        r = requests.post(GEMINI_URL, headers=headers, data=json.dumps(payload), timeout=15)
+        r.raise_for_status()
+    except Exception as e:
+        logger.error(f"[Gemini] Error: {e}")
+        return {"summary": "", "raw": ""}
+
+    data = r.json()
+
+    try:
+        summary = data["candidates"][0]["content"]["parts"][0]["text"]
+    except:
+        summary = data
+
+    return {
+        "summary": summary,
+        "raw": data
+    }
+
+
+# --------------------------------------------------------
+# 3) HYBRID SEARCH (FULL PIPELINE)
+# --------------------------------------------------------
+def hybrid_search(query, num_results=5):
+    """
+    Pipeline:
+    - Step 1: Google CSE → Get real web URLs
+    - Step 2: Gemini → RAG analyze those URLs
+    """
+
+    # Step A: Real search
+    cse_results = google_cse_search(query, num_results=num_results)
+
+    # Step B: Gemini RAG
+    gemini_output = gemini_rag_analyze(query, cse_results)
+
+    return {
+        "provider": "Hybrid (CSE + Gemini)",
+        "query": query,
+        "results": cse_results,
+        "analysis": gemini_output["summary"]
+    }
+    # Fallback to SerpAPI
+    if SERPAPI_KEY:
+        try:
+            url = "https://serpapi.com/search.json"
+            params = {"q": query, "engine": "google", "num": num_results, "api_key": SERPAPI_KEY}
+            r = requests.get(url, params=params, timeout=15)
+            r.raise_for_status()
+            data = r.json()
+            results = []
+            for item in data.get("organic_results", [])[:num_results]:
+                results.append({
+                    "title": item.get("title"),
+                    "snippet": item.get("snippet") or "",
+                    "link": item.get("link")
+                })
+            st.success("[DEBUG] Using SerpAPI for search.")
+            logger.info("[DEBUG] Using SerpAPI for search.")
+            # Attach provider info
+            return {"provider": "SerpAPI", "results": results}
+        except Exception as e:
+            logger.error(f"SerpAPI search failed: {e}")
+            st.warning(f"[DEBUG] SerpAPI search failed: {e}")
+    logger.warning("No search API configured or all failed")
+    return {"provider": "None", "results": []}
 
 def get_llm_status():
     """Check which LLMs are available and configured"""
@@ -445,26 +594,19 @@ async def web_search_tool(params: Union[str, Dict[str, Any]], top_k: int = 3) ->
     
     logger.info(f"🌐 TOOL: Web Search - Query: {query[:50]}...")
     
-    if not SERPAPI_KEY:
-        logger.warning("⚠️ SerpAPI key not configured - search will fail")
-        return {
-            "status": "error",
-            "results": [],
-            "result_count": 0,
-            "error": "SerpAPI key not configured",
-            "timestamp": datetime.utcnow().isoformat()
-        }
-    
-    results = serpapi_search(query, num_results=top_k)
+    search_data = web_search(query, num_results=top_k)
+    results = search_data.get("results", [])
+    provider = search_data.get("provider", "Unknown")
     
     if results:
-        logger.info(f"✅ Found {len(results)} search results")
+        logger.info(f"✅ Found {len(results)} search results from {provider}")
     else:
-        logger.warning("⚠️ No search results found")
+        logger.warning(f"⚠️ No search results found from {provider}")
     
     return {
         "status": "success" if results else "no_results",
         "results": results,
+        "provider": provider,
         "result_count": len(results),
         "timestamp": datetime.utcnow().isoformat()
     }
@@ -671,21 +813,24 @@ async def rag_analysis_tool(params: RAGInput) -> RAGOutput:
     
     # Search
     search_result = await web_search_tool(query, top_k=3)
-    
+
+    provider = search_result.get("provider", "Unknown")
+
     if search_result["status"] == "no_results" or search_result["status"] == "error":
         return {
             "status": "no_sources",
             "insights": "No web sources found. Using internal knowledge for maintenance recommendations.",
             "sources": [],
+            "provider": provider,
             "timestamp": datetime.utcnow().isoformat()
         }
-    
+
     # Build context
     context = "\n\n".join([
         f"Source: {r['title']}\n{r['snippet']}"
         for r in search_result.get("results", [])
     ])
-    
+
     # LLM analysis
     prompt = f"""Analyze this maintenance situation:
 
@@ -719,11 +864,12 @@ Actions:
     )
     
     sources = [r["link"] for r in search_result.get("results", [])]
-    
+
     return {
         "status": "success",
         "insights": analysis,
         "sources": sources,
+        "provider": provider,
         "timestamp": datetime.utcnow().isoformat()
     }
 
@@ -1007,6 +1153,9 @@ if "agent_runs" not in st.session_state:
 st.title("👷 ForeSight Agent")
 st.markdown("**AI-Powered Predictive Maintenance System**")
 
+# Friendly note from Bob the agent
+st.info("Hey.. I'm Bob the agent! Enter the equipment inputs to get technical insights, failure patterns, and industry best practices instantly.")
+
 st.markdown("---")
 
 # Sidebar
@@ -1063,6 +1212,13 @@ if not (llm_status["gemini"]["available"] or llm_status["openai"]["available"]):
 st.sidebar.markdown("---")
 st.sidebar.subheader("🔧 API Configuration")
 
+# Google CSE configuration indicator (moved to top)
+google_cse_status = bool(get_secret("GOOGLE_API_KEY")) and bool(get_secret("GOOGLE_CSE_ID"))
+if google_cse_status:
+    st.sidebar.success("✅ Google CSE configured")
+else:
+    st.sidebar.error("❌ Google CSE not configured")
+
 if SERPAPI_KEY:
     st.sidebar.success("✅ SerpAPI configured")
 else:
@@ -1080,19 +1236,29 @@ else:
 
 # Main interface
 st.header("Equipment Input")
+st.markdown("<div style='height:32px'></div>", unsafe_allow_html=True)
 
-col1, col2 = st.columns(2)
+# Use wider columns and more padding
+col1, col2 = st.columns([1.2,1.2], gap="medium")
 
 with col1:
+    st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
     device_id = st.selectbox("🆔 Device ID", ["Device001", "Device002", "Device003"])
+    st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
     device_type = st.selectbox("⚙️ Device Type", ["Pump", "Compressor", "Motor"])
+    st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
     temperature = st.slider("🌡️ Temperature (°C)", 100.0, 200.0, 160.0)
+    st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
     vibration = st.slider("🌀 Vibration (mm/s)", 0.0, 10.0, 2.5)
 
 with col2:
+    st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
     pressure = st.slider("💨 Pressure (PSI)", 80.0, 120.0, 95.0)
+    st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
     humidity = st.slider("💧 Humidity (%)", 10, 100, 40)
+    st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
     power = st.slider("⚡ Power (kW)", 0, 200, 50)
+st.markdown("<div style='height:32px'></div>", unsafe_allow_html=True)
 
 if st.button("🚀 Start Agent Loop", type="primary"):
     # Check if LLM is available
@@ -1118,6 +1284,9 @@ if st.button("🚀 Start Agent Loop", type="primary"):
             st.write(f"OpenAI: {llm_status['openai']['available']}")
         with diag_col2:
             st.markdown("**APIs:**")
+            # Google CSE status (moved to top)
+            google_cse_status = bool(get_secret("GOOGLE_API_KEY")) and bool(get_secret("GOOGLE_CSE_ID"))
+            st.write(f"Google CSE: {google_cse_status}")
             st.write(f"SerpAPI: {bool(SERPAPI_KEY)}")
             st.write(f"SendGrid: {bool(SENDGRID_AVAILABLE and get_secret('SENDGRID_API_KEY'))}")
             st.write("Email: Configured")
@@ -1220,9 +1389,6 @@ if st.button("🚀 Start Agent Loop", type="primary"):
         else:
             st.info("No email sent")
     # ...existing code...
-
-    # ...existing code...
-    # ...existing code...
     
     # RAG Details
     if rag_result and rag_result.get("status") == "success":
@@ -1230,15 +1396,17 @@ if st.button("🚀 Start Agent Loop", type="primary"):
         st.markdown("### 📚 RAG Analysis Details")
         insights = rag_result.get("insights", "")
         sources = rag_result.get("sources", [])
-        st.markdown("**AI-Generated Insights:**")
+        provider = rag_result.get("provider", "Unknown")
+        st.markdown(f"**AI-Generated Insights:**  ")
         st.info(insights)
+        st.markdown(f"**Search Provider Used:** `{provider}`")
         if sources:
             st.markdown("**Sources:**")
             for source in sources:
                 st.markdown(f"- [{source}]({source})")
-        # SHAP feature chart moved after RAG
-        st.markdown("---")
+        # SHAP feature chart below RAG analysis
         if prediction_result and SHAP_AVAILABLE and MATPLOTLIB_AVAILABLE:
+            st.markdown("---")
             st.subheader("🔍 SHAP Feature Contributions")
             base_inputs = {
                 "temperature": context["temperature"],
