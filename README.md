@@ -34,13 +34,13 @@ Facility management and asset health tracking
 **The Challenge:** Industrial equipment failures cost manufacturers billions annually through unplanned downtime, emergency repairs, and lost productivity. Traditional maintenance approaches fall into two problematic extremes:
 * Reactive Maintenance: Waiting for equipment to fail leads to costly emergency repairs, production shutdowns, and safety risks
 * Preventive Maintenance: Fixed schedules result in unnecessary maintenance, wasted resources, and still miss unexpected failures
-Real-World Impact:
+**Real-World Impact:**
 * Average manufacturing downtime costs: $260,000 per hour
 * 70% of companies have experienced unexpected downtime in the past 3 years
 * Maintenance teams struggle to prioritize resources across hundreds of assets
 * Critical failure patterns go undetected until catastrophic breakdowns occur
 
-**Approach:**
+**Solution:**
 
 An AI-powered predictive maintenance platform that analyzes equipment sensor data in real-time to predict failures before they happen, transforming maintenance from reactive to proactive.
 
@@ -77,6 +77,12 @@ An AI-powered predictive maintenance platform that analyzes equipment sensor dat
 * Predictive maintenance investment: ~$150K
 * Expected 40% downtime reduction: $1M+ annual savings
 * Payback period: < 2 months
-6. Platform learns from outcomes to improve accuracy over time
+* Platform learns from outcomes to improve accuracy over time
+  
+**Strategic Value:** This isn't just about fixing things faster—it's about fundamentally changing how organizations think about asset management. By shifting from reactive to predictive, companies can plan better, optimize resources, and turn maintenance from a cost center into a strategic advantage.
 
+**Why This Matters Now:** With IoT sensors becoming ubiquitous and AI models more accessible, predictive maintenance is no longer a luxury for Fortune 500 companies—it's becoming table stakes for any manufacturer who wants to remain competitive. Our platform makes this technology accessible, affordable, and actionable for organizations of all sizes.
+
+------------------------------------------------------------------------------------------------------------
+**Architectural Diagram**
   
