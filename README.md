@@ -89,3 +89,41 @@ An AI-powered predictive maintenance platform that analyzes equipment sensor dat
 
   
 <img width="738" height="687" alt="image" src="https://github.com/user-attachments/assets/6fe57b81-41ad-4486-abe8-2648334dfdd2" />
+
+
+**Steps to run the code**
+
+**Clone the repository:**
+
+git clone https://github.com/Jasna04/Predictive_Maintenance_Agent.git
+
+Open codespace
+
+cd Predictive_Maintenance_Agent
+  
+Install Python and pip (if not already installed):
+sudo apt update
+sudo apt install python3 python3-pip
+
+Install required Python packages:
+
+pip3 install -r requirements.txt
+
+**Set up your secrets:**
+Create **.streamlit/secrets.toml** in your project root.
+Add your API keys and credentials as shown in the example you provided.
+
+SENDGRID_API_KEY = "SENDGRID_API_KEY"
+SERPAPI_API_KEY = "SERPAPI_API_KEY"
+Email_ID = "Email_ID"
+OPENAI_API_KEY = "OPENAI_API_KEY"
+GOOGLE_API_KEY = "GOOGLE_API_KEY"
+GOOGLE_CSE_ID = "GOOGLE_CSE_ID"
+
+
+Open the local URL provided by Streamlit in your browser to use the app.
+Note: Never commit your .secrets.toml file or any sensitive keys to GitHub. Use environment variables or secret management for production.
+
+------------------------------------
+
+
