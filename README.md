@@ -85,4 +85,7 @@ An AI-powered predictive maintenance platform that analyzes equipment sensor dat
 
 ------------------------------------------------------------------------------------------------------------
 **Architectural Diagram**
+
+
   
+<img width="738" height="687" alt="image" src="https://github.com/user-attachments/assets/6fe57b81-41ad-4486-abe8-2648334dfdd2" />
