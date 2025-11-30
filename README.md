@@ -111,13 +111,18 @@ pip3 install -r requirements.txt
 
 **Set up your secrets:**
 Create **.streamlit/secrets.toml** in your project root.
-Add your API keys and credentials as shown in the example you provided.
+Add your API keys and credentials as shown in the example provided.
 
 SENDGRID_API_KEY = "SENDGRID_API_KEY"
+
 SERPAPI_API_KEY = "SERPAPI_API_KEY"
+
 Email_ID = "Email_ID"
+
 OPENAI_API_KEY = "OPENAI_API_KEY"
+
 GOOGLE_API_KEY = "GOOGLE_API_KEY"
+
 GOOGLE_CSE_ID = "GOOGLE_CSE_ID"
 
 
