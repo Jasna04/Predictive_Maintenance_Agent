@@ -9,10 +9,10 @@ Reactive Maintenance: Waiting for equipment to fail leads to costly emergency re
 
 Preventive Maintenance: Fixed schedules result in unnecessary maintenance, wasted resources, and still miss unexpected failures
 
-Real-World Impact:
+**Real-World Impact:**
 
-Average manufacturing downtime costs: $260,000 per hour
-70% of companies have experienced unexpected downtime in the past 3 years
+Average manufacturing downtime costs: **$260,000 per hour**
+**70% of companies have experienced unexpected downtime in the past 3 years**
 Maintenance teams struggle to prioritise resources across hundreds of assets
 Critical failure patterns go undetected until catastrophic breakdowns occur
 
@@ -164,7 +164,7 @@ Streamlit cloud communtiy - https://predictivemaintenanceagent-k93b9czgzxvsldqmb
 
 git clone https://github.com/Jasna04/Predictive_Maintenance_Agent.git
 
-Open codespace **[ Note the application will start itself in the terminal if does not start then follow the steps below ]**
+Open codespace **[ The application should start automatically in the terminal if does not start then follow the steps below ]**
 
 Install Python and pip (if not already installed):
 
