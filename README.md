@@ -164,7 +164,7 @@ Streamlit cloud communtiy - https://predictivemaintenanceagent-k93b9czgzxvsldqmb
 
 git clone https://github.com/Jasna04/Predictive_Maintenance_Agent.git
 
-Open codespace
+Open codespace [ Note the application will start itself in the terminal if does not start then follow the steps below ]
 
 Install Python and pip (if not already installed):
 
@@ -192,6 +192,8 @@ OPENAI_API_KEY = "OPENAI_API_KEY" --- Open API Key
 GOOGLE_API_KEY = "GOOGLE_API_KEY" --- Google API key
 
 GOOGLE_CSE_ID = "GOOGLE_CSE_ID" --- Google custom search engine key
+
+Run - streamlit run streamlit_app.py --server.enableCORS false --server.enableXsrfProtection false
 
 
 Open the local URL provided by Streamlit in your browser to use the app.
