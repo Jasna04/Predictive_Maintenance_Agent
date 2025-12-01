@@ -34,6 +34,7 @@ Facility management and asset health tracking
 **The Challenge:** Industrial equipment failures cost manufacturers billions annually through unplanned downtime, emergency repairs, and lost productivity. Traditional maintenance approaches fall into two problematic extremes:
 * Reactive Maintenance: Waiting for equipment to fail leads to costly emergency repairs, production shutdowns, and safety risks
 * Preventive Maintenance: Fixed schedules result in unnecessary maintenance, wasted resources, and still miss unexpected failures
+  
 **Real-World Impact:**
 * Average manufacturing downtime costs: $260,000 per hour
 * 70% of companies have experienced unexpected downtime in the past 3 years
@@ -57,21 +58,25 @@ An AI-powered predictive maintenance platform that analyzes equipment sensor dat
 4. Maintenance teams receive specific action recommendations
 
 **Quantifiable Benefits:**
+
 **For Operations Teams:**
 * 30-50% reduction in unplanned downtime
 * 20-25% decrease in maintenance costs
 * 15-30% improvement in equipment lifespan
 * 70-90% advance warning before critical failures
+  
 **For Maintenance Teams:**
 * Replace gut-feel decisions with data-driven prioritization
 * Shift from firefighting to planned, strategic maintenance
 * Optimize spare parts inventory based on predicted needs
 * Document and prove maintenance ROI
+  
 **For the Business:**
 * Increased Revenue: More uptime means more production capacity
 * Cost Savings: Prevent expensive emergency repairs and rush orders
 * Safety Improvement: Reduce workplace accidents from equipment failures
 * Competitive Advantage: Reliability becomes a differentiator
+  
 **ROI Example:** A mid-sized manufacturer with 100 critical assets:
 * Current annual downtime cost: ~$2.6M
 * Predictive maintenance investment: ~$150K
@@ -91,6 +96,32 @@ An AI-powered predictive maintenance platform that analyzes equipment sensor dat
 <img width="738" height="687" alt="image" src="https://github.com/user-attachments/assets/6fe57b81-41ad-4486-abe8-2648334dfdd2" />
 
 
+**Features Implemented:**
+
+1. **Multi-agent system, Sequential,Loop agents** [Core Loop]
+The snippet from MaintenanceAgent shows the Think → Act → Observe loop, which is the core driver of the MCP model.
+
+2. **Custom Tool implementation**
+Custom Tools - google_cse_search (Google Custom Search Engine - CSE) 
+web_search_tool, email_alert_tool, rag_analysis_tool, prediction_tool
+
+3. **Long-running Operations (Pause/Resume Agents)**
+The AgentMemory TypedDict defines the minimal required data (thoughts, actions, iteration count) needed to restart and resume the agent at any time.
+
+4. **Sessions & state management**
+st.session_state and the AgentMemory TypedDict to save the history of runs, thoughts, actions, and observations, fulfilling the role of an InMemorySessionService.
+
+5. **Context engineering**
+format_history method takes the memory lists (thoughts, actions, observations) and formats them into a compact text block for the LLM's prompt
+
+6. **Observability: Logging, Tracing, Metrics**
+Python logging, timestamp module to track the agent's internal decisions and actions
+
+7. **Agent deployment**
+Streamlit cloud communtiy - https://predictivemaintenanceagent-k93b9czgzxvsldqmbgyfnc.streamlit.app
+
+
+
 **Steps to run the code**
 
 **Clone the repository:**
@@ -99,11 +130,9 @@ git clone https://github.com/Jasna04/Predictive_Maintenance_Agent.git
 
 Open codespace
 
-cd Predictive_Maintenance_Agent
-  
 Install Python and pip (if not already installed):
-sudo apt update
-sudo apt install python3 python3-pip
+
+install python3.11 python3-pip
 
 Install required Python packages:
 
@@ -111,19 +140,22 @@ pip3 install -r requirements.txt
 
 **Set up your secrets:**
 Create **.streamlit/secrets.toml** in your project root.
+
+![A772EF43-1F29-41E3-8516-0CFE42867B59](https://github.com/user-attachments/assets/52e78178-b620-48e4-b98d-2f20378a028e)
+
 Add your API keys and credentials as shown in the example provided.
 
-SENDGRID_API_KEY = "SENDGRID_API_KEY"
+SENDGRID_API_KEY = "SENDGRID_API_KEY" --- Email configuration
 
-SERPAPI_API_KEY = "SERPAPI_API_KEY"
+SERPAPI_API_KEY = "SERPAPI_API_KEY" --- Search API
 
-Email_ID = "Email_ID"
+Email_ID = "Email_ID" --- Email ID for mailing the prediction
 
-OPENAI_API_KEY = "OPENAI_API_KEY"
+OPENAI_API_KEY = "OPENAI_API_KEY" --- Open API Key
 
-GOOGLE_API_KEY = "GOOGLE_API_KEY"
+GOOGLE_API_KEY = "GOOGLE_API_KEY" --- Google API key
 
-GOOGLE_CSE_ID = "GOOGLE_CSE_ID"
+GOOGLE_CSE_ID = "GOOGLE_CSE_ID" --- Google custom search engine key
 
 
 Open the local URL provided by Streamlit in your browser to use the app.
