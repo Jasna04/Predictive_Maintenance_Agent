@@ -12,8 +12,11 @@ Preventive Maintenance: Fixed schedules result in unnecessary maintenance, waste
 **Real-World Impact:**
 
 Average manufacturing downtime costs: **$260,000 per hour**
+
 **70% of companies have experienced unexpected downtime in the past 3 years**
+
 Maintenance teams struggle to prioritise resources across hundreds of assets
+
 Critical failure patterns go undetected until catastrophic breakdowns occur
 
 🚀 **SOLUTION**
