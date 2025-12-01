@@ -1,4 +1,4 @@
-✏️ PROBLEM STATMENT
+✏️ **PROBLEM STATMENT**
 
 The Challenge:
 Industrial equipment failures cost manufacturers billions annually through unplanned downtime, emergency repairs, and lost productivity.
@@ -16,11 +16,11 @@ Average manufacturing downtime costs: $260,000 per hour
 Maintenance teams struggle to prioritise resources across hundreds of assets
 Critical failure patterns go undetected until catastrophic breakdowns occur
 
-🚀 SOLUTION
+🚀 **SOLUTION**
 
 An AI-powered predictive maintenance platform that analyzes equipment sensor data in real-time to predict failures before they happen, transforming maintenance from reactive to proactive.
 
-🎁Key Features:
+🎁 **Key Features:**
 
 AI Failure Prediction: Machine learning models detect anomalies and predict failure probability giving advance warning
 Smart Prioritisation: Risk-based alerts help teams focus on the most critical issues first
