@@ -167,7 +167,7 @@ Streamlit cloud communtiy - https://predictivemaintenanceagent-k93b9czgzxvsldqmb
 
 git clone https://github.com/Jasna04/Predictive_Maintenance_Agent.git
 
-Open codespace **[ The application should start automatically in the terminal if does not start then follow the steps below ]**
+**Create a new Codespace** **[ The application should start automatically in the terminal if does not start then follow the steps below ]**
 
 Install Python and pip (if not already installed):
 
