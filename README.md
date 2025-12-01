@@ -1,3 +1,33 @@
+✏️ PROBLEM STATMENT
+
+The Challenge:
+Industrial equipment failures cost manufacturers billions annually through unplanned downtime, emergency repairs, and lost productivity.
+
+Traditional maintenance approaches fall into two problematic extremes:
+
+Reactive Maintenance: Waiting for equipment to fail leads to costly emergency repairs, production shutdowns, and safety risks.
+
+Preventive Maintenance: Fixed schedules result in unnecessary maintenance, wasted resources, and still miss unexpected failures
+
+Real-World Impact:
+
+Average manufacturing downtime costs: $260,000 per hour
+70% of companies have experienced unexpected downtime in the past 3 years
+Maintenance teams struggle to prioritise resources across hundreds of assets
+Critical failure patterns go undetected until catastrophic breakdowns occur
+
+🚀 SOLUTION
+
+An AI-powered predictive maintenance platform that analyzes equipment sensor data in real-time to predict failures before they happen, transforming maintenance from reactive to proactive.
+
+🎁Key Features:
+
+AI Failure Prediction: Machine learning models detect anomalies and predict failure probability giving advance warning
+Smart Prioritisation: Risk-based alerts help teams focus on the most critical issues first
+Actionable Insights: Specific recommendations on what needs attention and why
+Integration Ready: Connects with existing IoT sensors and maintenance management systems
+
+
 **ForeSight Predictive Maintenance Agent**
 ForeSight is an intelligent, multi-agent Streamlit application designed to help organizations proactively manage equipment health and prevent costly downtime. Leveraging advanced machine learning, real-time analytics, and agentic orchestration, ForeSight predicts potential failures, analyzes root causes, and recommends actionable maintenance strategies.
 
@@ -36,8 +66,8 @@ Facility management and asset health tracking
 * Preventive Maintenance: Fixed schedules result in unnecessary maintenance, wasted resources, and still miss unexpected failures
   
 **Real-World Impact:**
-* Average manufacturing downtime costs: $260,000 per hour
-* 70% of companies have experienced unexpected downtime in the past 3 years
+* Average manufacturing downtime costs: **$260,000 per hour**
+* 70% of companies have experienced unexpected downtime in the past **3 years**
 * Maintenance teams struggle to prioritize resources across hundreds of assets
 * Critical failure patterns go undetected until catastrophic breakdowns occur
 
@@ -60,10 +90,10 @@ An AI-powered predictive maintenance platform that analyzes equipment sensor dat
 **Quantifiable Benefits:**
 
 **For Operations Teams:**
-* 30-50% reduction in unplanned downtime
-* 20-25% decrease in maintenance costs
-* 15-30% improvement in equipment lifespan
-* 70-90% advance warning before critical failures
+* **30-50%** reduction in unplanned downtime
+* **20-25%** decrease in maintenance costs
+* **15-30%** improvement in equipment lifespan
+* **70-90%** advance warning before critical failures
   
 **For Maintenance Teams:**
 * Replace gut-feel decisions with data-driven prioritization
@@ -78,10 +108,10 @@ An AI-powered predictive maintenance platform that analyzes equipment sensor dat
 * Competitive Advantage: Reliability becomes a differentiator
   
 **ROI Example:** A mid-sized manufacturer with 100 critical assets:
-* Current annual downtime cost: ~$2.6M
-* Predictive maintenance investment: ~$150K
-* Expected 40% downtime reduction: $1M+ annual savings
-* Payback period: < 2 months
+* Current annual downtime cost: **~$2.6M**
+* Predictive maintenance investment: **~$150K**
+* Expected 40% downtime reduction: **$1M+ annual savings**
+* Payback period: **< 2 months**
 * Platform learns from outcomes to improve accuracy over time
   
 **Strategic Value:** This isn't just about fixing things faster—it's about fundamentally changing how organizations think about asset management. By shifting from reactive to predictive, companies can plan better, optimize resources, and turn maintenance from a cost center into a strategic advantage.
@@ -99,27 +129,33 @@ An AI-powered predictive maintenance platform that analyzes equipment sensor dat
 **Features Implemented:**
 
 1. **Multi-agent system, Sequential,Loop agents** [Core Loop]
+   
 The snippet from MaintenanceAgent shows the Think → Act → Observe loop, which is the core driver of the MCP model.
 
 2. **Custom Tool implementation**
+   
 Custom Tools - google_cse_search (Google Custom Search Engine - CSE) 
 web_search_tool, email_alert_tool, rag_analysis_tool, prediction_tool
 
 3. **Long-running Operations (Pause/Resume Agents)**
+
 The AgentMemory TypedDict defines the minimal required data (thoughts, actions, iteration count) needed to restart and resume the agent at any time.
 
 4. **Sessions & state management**
+   
 st.session_state and the AgentMemory TypedDict to save the history of runs, thoughts, actions, and observations, fulfilling the role of an InMemorySessionService.
 
 5. **Context engineering**
+    
 format_history method takes the memory lists (thoughts, actions, observations) and formats them into a compact text block for the LLM's prompt
 
 6. **Observability: Logging, Tracing, Metrics**
+    
 Python logging, timestamp module to track the agent's internal decisions and actions
 
 7. **Agent deployment**
+    
 Streamlit cloud communtiy - https://predictivemaintenanceagent-k93b9czgzxvsldqmbgyfnc.streamlit.app
-
 
 
 **Steps to run the code**
